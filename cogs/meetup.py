@@ -4,10 +4,23 @@ meetup_mention = '<@&487120797190848534>'
 x_emojis = ['❎', '❌', '✖️']
 check_emojis = ['☑️', '✔️', '✅']
 
-def check_meetup_channel(ctx):
-	return ctx.message.channel.id in meetup_channels
+cancel_messages = ['cancel', 'stop']
+
+meetup_dict = {
+	'title': "What is the title of this meetup?",
+	'when_where': "When and Where (Ex: Tommorow 3 @ Starbucks)",
+	'time': "What is the period of time (Ex: 12:30)?",
+	'type': "Is this casual or structured?",
+	'activity': "What are we doing?",
+	'cost': "What is the cost range?",
+	'description': "Write a small description about this meetup.",
+	'location': "Paste a link to Google Maps or anything else (Optional, put a non-url to skip)."
+}
 
 event_list = []
+
+def check_meetup_channel(ctx):
+	return ctx.message.channel.id in meetup_channels
 
 @bot.event
 async def on_reaction_add(reaction, user):
@@ -44,46 +57,15 @@ async def meetup(ctx):
 		prog = re.compile(url_pattern)
 		return prog.search(url)
 
+	def append_embed(qid, question):
+		bot_messages.append(await ctx.send(question, delete_after=60.0))
+		msg = await bot.wait_for('message', timeout=60.0, check=check)
+		event[qid] = msg 
+		if msg in cancel_messages: raise asyncio.TimeoutError
+
 	try:
-		bot_messages.append(await ctx.send("What is the title of this meetup?", delete_after=60.0))
-		msg = await bot.wait_for('message', timeout=60.0, check=check)
-		event['title'] = msg 
-		if msg == 'cancel': raise asyncio.TimeoutError
-
-		bot_messages.append(await ctx.send("When and Where (Ex: Tommorow 3 @ Starbucks)", delete_after=60.0))
-		msg = await bot.wait_for('message', timeout=60.0, check=check)
-		event['when_where'] = msg 
-		if msg == 'cancel': raise asyncio.TimeoutError
-
-		bot_messages.append(await ctx.send("What is the period of time (Ex: 12:30)?", delete_after=60.0))
-		msg = await bot.wait_for('message', timeout=60.0, check=check)
-		event['time'] = msg 
-		if msg == 'cancel': raise asyncio.TimeoutError
-
-		bot_messages.append(await ctx.send("Is this casual or structured?", delete_after=60.0))
-		msg = await bot.wait_for('message', timeout=60.0, check=check)
-		event['type'] = msg 
-		if msg == 'cancel': raise asyncio.TimeoutError
-
-		bot_messages.append(await ctx.send("What are we doing?", delete_after=60.0))
-		msg = await bot.wait_for('message', timeout=60.0, check=check)
-		event['activity'] = msg 
-		if msg == 'cancel': raise asyncio.TimeoutError
-
-		bot_messages.append(await ctx.send("What is the cost range?", delete_after=60.0))
-		msg = await bot.wait_for('message', timeout=60.0, check=check)
-		event['cost'] = msg 
-		if msg == 'cancel': raise asyncio.TimeoutError
-
-		bot_messages.append(await ctx.send("Write a small description about this meetup.", delete_after=60.0))
-		msg = await bot.wait_for('message', timeout=60.0, check=check)
-		event['description'] = msg 
-		if msg == 'cancel': raise asyncio.TimeoutError
-
-		bot_messages.append(await ctx.send("Paste a link to Google Maps or anything else (Optional, put a non-url to skip).", delete_after=60.0))
-		msg = await bot.wait_for('message', timeout=60.0, check=check)
-		event['location'] = msg
-		if msg == 'cancel': raise asyncio.TimeoutError
+		for k,v in meetup_dict:
+			append_embed(k,v)
 		
 	except asyncio.TimeoutError:
 		await ctx.send(":thumbsdown:, Your request timed out", delete_after=15.0)
@@ -96,6 +78,7 @@ async def meetup(ctx):
 			embed = discord.Embed(title=event['title'].content, url=event['location'].content, description=event['when_where'].content, color=0x00baa6)
 		else:
 			embed = discord.Embed(title=event['title'].content, description=event['when_where'].content, color=0x00baa6)
+		
 		embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
 		embed.add_field(name='Type', value=event['type'].content, inline=True)
 		embed.add_field(name='Time', value=event['time'].content, inline=True)
