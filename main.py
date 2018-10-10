@@ -40,7 +40,7 @@ async def on_ready():
 	print(f'\n\nLogged in as: {bot.user.name} - {bot.user.id}\nVersion: {discord.__version__}\n')
 
 	# Changes our bots Playing Status. type=1(streaming) for a standard game you could remove type and url.
-	await bot.change_presence(game=discord.Game(name='Life is cool! (prefix: ~)'))
+	await bot.change_presence(activity=discord.Game(name='Life is cool! (prefix: ~~~)'))
 	print('Successfully logged in and booted...!')
 
 hello_list = [
@@ -68,6 +68,6 @@ hello_weights = [
 @bot.command()
 @commands.cooldown(rate=20,per=10,type=commands.BucketType.user)
 async def hello(ctx):
-	await ctx.send(random.choices(hello_list, hello_weights)[0].format(ctx.format))
+	await ctx.send(random.choices(hello_list, hello_weights)[0].format(ctx.author))
 
 bot.run(tk.token(), bot=True, reconnect=True)
