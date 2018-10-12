@@ -5,32 +5,35 @@ from random import randint
 from discord.ext import commands
 
 class MeetupCog:
+	meetup_channels = (400567035249033217, 362691852274630657)
+	meetup_mention = '<@&487120797190848534>'
+
+	x_emojis = ['❎', '❌', '✖️']
+	check_emojis = ['☑️', '✔️', '✅']
+
+	cancel_messages = ['cancel', 'stop']
+
+	meetup_dict = {
+		'title': "What is the title of this meetup?",
+		'when_where': "When and Where (Ex: Tommorow 3 @ Starbucks)",
+		'time': "What is the period of time (Ex: 12:30)?",
+		'type': "Is this casual or structured?",
+		'activity': "What are we doing?",
+		'cost': "What is the cost range?",
+		'description': "Write a small description about this meetup.",
+		'location': "Paste a link to Google Maps or anything else (Optional, put a non-url to skip)."
+	}
+
+	rx_uw_bot_id = 489158438086115328
+
+	url_pattern = '(https?:\\/\\/(?:www\\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|www\\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|https?:\\/\\/(?:www\\.|(?!www))[a-zA-Z0-9]\\.[^\\s]{2,}|www\\.[a-zA-Z0-9]\\.[^\\s]{2,})'
+
 	def __init__(self, bot):
 		self.bot = bot
-
-		self.meetup_channels = (400567035249033217, 362691852274630657)
-		self.meetup_mention = '<@&487120797190848534>'
-
-		self.x_emojis = ['❎', '❌', '✖️']
-		self.check_emojis = ['☑️', '✔️', '✅']
-
-		self.cancel_messages = ['cancel', 'stop']
-
-		self.meetup_dict = {
-			'title': "What is the title of this meetup?",
-			'when_where': "When and Where (Ex: Tommorow 3 @ Starbucks)",
-			'time': "What is the period of time (Ex: 12:30)?",
-			'type': "Is this casual or structured?",
-			'activity': "What are we doing?",
-			'cost': "What is the cost range?",
-			'description': "Write a small description about this meetup.",
-			'location': "Paste a link to Google Maps or anything else (Optional, put a non-url to skip)."
-		}
-
 		self.event_list = []
 
-	def check_meetup_channel(self, ctx):
-		return ctx.message.channel.id in self.meetup_channels
+	def check_meetup_channel(ctx):
+		return ctx.message.channel.id in (400567035249033217, 362691852274630657)
 
 	async def on_reaction_add(self, reaction, user):
 		for event in self.event_list:
@@ -45,14 +48,14 @@ class MeetupCog:
 					await event[0].unpin()
 
 	async def on_message_delete(self, message):
-		if message.author.id == rx_uw_bot_id:
+		if message.author.id == self.rx_uw_bot_id:
 			for event in self.event_list:
 				if event[0].id == message.id:
 					self.event_list.remove(event)
 
 	@commands.command()
 	@commands.cooldown(rate=1,per=120,type=commands.BucketType.user)
-	#@commands.check(check_meetup_channel)
+	@commands.check(check_meetup_channel)
 	@commands.has_any_role('meetup', 'Mods', 'Admins')
 	async def meetup(self, ctx):
 		event = {}
@@ -62,18 +65,15 @@ class MeetupCog:
 			return msg.author == ctx.author and msg.channel.id in self.meetup_channels
 
 		def is_url(url):
-			prog = re.compile(url_pattern)
+			prog = re.compile(self.url_pattern)
 			return prog.search(url)
-
-		async def append_embed(qid, question):
-			bot_messages.append(await ctx.send(question, delete_after=60.0))
-			msg = await bot.wait_for('message', timeout=60.0, check=check)
-			event[qid] = msg 
-			if msg in self.cancel_messages: raise asyncio.TimeoutError
 
 		try:
 			for k,v in self.meetup_dict.items():
-				append_embed(k,v)
+				bot_messages.append(await ctx.send(v, delete_after=60.0))
+				msg = await self.bot.wait_for('message', timeout=60.0, check=check)
+				event[k] = msg 
+				if msg in self.cancel_messages: raise asyncio.TimeoutError
 			
 		except asyncio.TimeoutError:
 			await ctx.send(":thumbsdown:, Your request timed out", delete_after=15.0)
