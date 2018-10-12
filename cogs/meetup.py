@@ -35,6 +35,13 @@ class MeetupCog:
 	def check_meetup_channel(ctx):
 		return ctx.message.channel.id in (400567035249033217, 362691852274630657)
 
+	def check_rx(ctx):
+		return ctx.message.author.id == 136278937532628993
+
+	async def on_command_error(self, ctx, error):
+		if isinstance(error, commands.CommandOnCooldown):
+		 	await ctx.send(f'That command is on cooldown. Please try after {int(error.retry_after) + 1} second(s).')
+
 	async def on_reaction_add(self, reaction, user):
 		for event in self.event_list:
 			if event[0].id == reaction.message.id:
@@ -54,7 +61,7 @@ class MeetupCog:
 					self.event_list.remove(event)
 
 	@commands.command()
-	@commands.cooldown(rate=1,per=120,type=commands.BucketType.user)
+	@commands.cooldown(rate=1,per=60,type=commands.BucketType.user)
 	@commands.check(check_meetup_channel)
 	@commands.has_any_role('meetup', 'Mods', 'Admins')
 	async def meetup(self, ctx):
@@ -73,7 +80,7 @@ class MeetupCog:
 				bot_messages.append(await ctx.send(v, delete_after=60.0))
 				msg = await self.bot.wait_for('message', timeout=60.0, check=check)
 				event[k] = msg 
-				if msg in self.cancel_messages: raise asyncio.TimeoutError
+				if msg.content.lower() in self.cancel_messages: raise asyncio.TimeoutError
 			
 		except asyncio.TimeoutError:
 			await ctx.send(":thumbsdown:, Your request timed out", delete_after=15.0)
@@ -116,6 +123,18 @@ class MeetupCog:
 				await msg.delete()
 
 			await ctx.message.delete()
+
+	@commands.command()
+	@commands.check(check_rx)	
+	async def testpin(self, ctx):
+		msg = await ctx.send("This message is pinned and self-destruct in 20 seconds", delete_after=20.0)
+		await msg.pin()
+
+	@commands.command()
+	@commands.check(check_rx)
+	async def testreaction(self, ctx):
+		msg = await ctx.send("This message will be auto-reacted and self-destruct in 20 seconds", delete_after=20.0)
+		await msg.add_reaction('👍')
 
 def setup(bot):
     bot.add_cog(MeetupCog(bot))
