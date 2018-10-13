@@ -12,11 +12,10 @@ logging.basicConfig(level="WARNING")
 
 bot = commands.Bot(command_prefix="~", description="Rx has the best bot let that be heard.")
 setattr(bot, "logger", logging.getLogger("log"))
-url_pattern = '(https?:\\/\\/(?:www\\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|www\\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|https?:\\/\\/(?:www\\.|(?!www))[a-zA-Z0-9]\\.[^\\s]{2,}|www\\.[a-zA-Z0-9]\\.[^\\s]{2,})'
 
 ''' Returns prefixes for bot '''
 def get_prefix(bot, message):
-	prefixes = ['>']
+	prefixes = ['~']
 
 	# If we are in a guild, we allow for the user to mention us or use any of the prefixes in our list.
 	return commands.when_mentioned_or(*prefixes)(bot, message)
@@ -40,7 +39,7 @@ async def on_ready():
 	print(f'\n\nLogged in as: {bot.user.name} - {bot.user.id}\nVersion: {discord.__version__}\n')
 
 	# Changes our bots Playing Status. type=1(streaming) for a standard game you could remove type and url.
-	await bot.change_presence(activity=discord.Game(name='Life is cool! (prefix: ~~~)'))
+	await bot.change_presence(activity=discord.Game(name='Life is cool! (prefix: ~)'))
 	print('Successfully logged in and booted...!')
 
 hello_list = [

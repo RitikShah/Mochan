@@ -68,8 +68,11 @@ class MeetupCog:
 		event = {}
 		bot_messages = []
 
-		def check(msg):
+		def check_meetup(msg):
 			return msg.author == ctx.author and msg.channel.id in self.meetup_channels
+
+		def check(msg):
+			return msg.author == ctx.author
 
 		def is_url(url):
 			prog = re.compile(self.url_pattern)
@@ -78,7 +81,7 @@ class MeetupCog:
 		try:
 			for k,v in self.meetup_dict.items():
 				bot_messages.append(await ctx.send(v, delete_after=60.0))
-				msg = await self.bot.wait_for('message', timeout=60.0, check=check)
+				msg = await self.bot.wait_for('message', timeout=60.0, check=check_meetup)
 				event[k] = msg 
 				if msg.content.lower() in self.cancel_messages: raise asyncio.TimeoutError
 			
@@ -135,6 +138,16 @@ class MeetupCog:
 	async def testreaction(self, ctx):
 		msg = await ctx.send("This message will be auto-reacted and self-destruct in 20 seconds", delete_after=20.0)
 		await msg.add_reaction('👍')
+
+	@commands.command()
+	@commands.check(check_rx)
+	async def testdm(self, ctx):
+		await ctx.author.send("A test DM Message. Please reply...")
+		msg = await self.bot.wait_for('message', timeout=10.0, check=check)
+		if isinstance(msg.channel, discord.DMChannel):
+			await ctx.author.send("You said: " + msg.content)
+		else:
+			await ctx.author.send("Good bye")
 
 def setup(bot):
     bot.add_cog(MeetupCog(bot))
