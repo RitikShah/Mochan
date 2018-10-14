@@ -8,10 +8,10 @@ class MeetupCog:
 	meetup_channels = (400567035249033217, 362691852274630657)
 	meetup_mention = '<@&487120797190848534>'
 
-	x_emojis = ['❎', '❌', '✖️']
-	check_emojis = ['☑️', '✔️', '✅']
+	x_emojis = ('❎', '❌', '✖️')
+	check_emojis = ('☑️', '✔️', '✅')
 
-	cancel_messages = ['cancel', 'stop']
+	cancel_messages = ('cancel', 'stop')
 
 	meetup_dict = {
 		'title': "What is the title of this meetup?",
@@ -66,30 +66,26 @@ class MeetupCog:
 	@commands.has_any_role('meetup', 'Mods', 'Admins')
 	async def meetup(self, ctx):
 		event = {}
-		bot_messages = []
-
-		def check_meetup(msg):
-			return msg.author == ctx.author and msg.channel.id in self.meetup_channels
 
 		def check(msg):
-			return msg.author == ctx.author
+			return (msg.author == ctx.author) and (msg.guild is None)
 
 		def is_url(url):
 			prog = re.compile(self.url_pattern)
 			return prog.search(url)
 
+		await ctx.send("You have been dm'd with instructions.", delete_after=15.0)
+		await ctx.author.send("I will ask you a few questions about your meetup. \nSay cancel or stop at any point to cancel.\n ")
+
 		try:
 			for k,v in self.meetup_dict.items():
-				bot_messages.append(await ctx.send(v, delete_after=60.0))
-				msg = await self.bot.wait_for('message', timeout=60.0, check=check_meetup)
+				await ctx.author.send(v)
+				msg = await self.bot.wait_for('message', timeout=60.0, check=check)
 				event[k] = msg 
 				if msg.content.lower() in self.cancel_messages: raise asyncio.TimeoutError
 			
 		except asyncio.TimeoutError:
-			await ctx.send(":thumbsdown:, Your request timed out", delete_after=15.0)
-
-			for key, msg in event.items():
-				await msg.delete()
+			await ctx.send(":thumbsdown:, Your request timed out")
 
 		else:
 			if is_url(event['location'].content) is not None:
@@ -117,13 +113,8 @@ class MeetupCog:
 
 			self.event_list.append((embed_msg, ctx.author))
 
-			await ctx.send("👍 Meetup successfully created! Add any X emoji to the message to delete the event. Add any check emoji to unpin the event.", delete_after=10.0)
-
-			for key, msg in event.items():
-				await msg.delete()
-
-			for msg in bot_messages:
-				await msg.delete()
+			await ctx.author.send("Success!")
+			await ctx.send("👍 Meetup successfully created! Add any X emoji to the message to delete the event. Add any check emoji to unpin the event.", delete_after=20.0)
 
 			await ctx.message.delete()
 
@@ -142,12 +133,13 @@ class MeetupCog:
 	@commands.command()
 	@commands.check(check_rx)
 	async def testdm(self, ctx):
+
+		def check_dm(msg):
+			return msg.author == ctx.author and msg.guild is None
+
 		await ctx.author.send("A test DM Message. Please reply...")
-		msg = await self.bot.wait_for('message', timeout=10.0, check=check)
-		if isinstance(msg.channel, discord.DMChannel):
-			await ctx.author.send("You said: " + msg.content)
-		else:
-			await ctx.author.send("Good bye")
+		msg = await self.bot.wait_for('message', check=check_dm)
+		await ctx.author.send("You said: " + msg.content)
 
 def setup(bot):
     bot.add_cog(MeetupCog(bot))
