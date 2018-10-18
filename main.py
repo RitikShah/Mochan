@@ -8,7 +8,7 @@ import sys, traceback
 import random
 import tk
 
-logging.basicConfig(level="WARNING")
+logging.basicConfig(level="INFO")
 
 bot = commands.Bot(command_prefix="~", description="Rx has the best bot let that be heard.")
 setattr(bot, "logger", logging.getLogger("log"))
