@@ -77,46 +77,47 @@ class MeetupCog:
 		await ctx.send("You have been dm'd with instructions.", delete_after=15.0)
 		await ctx.author.send("I will ask you a few questions about your meetup. \nSay cancel or stop at any point to cancel.\n ")
 
-		try:
-			for k,v in self.meetup_dict.items():
-				await ctx.author.send(v)
-				msg = await self.bot.wait_for('message', timeout=60.0, check=check)
-				event[k] = msg 
-				if msg.content.lower() in self.cancel_messages: raise asyncio.TimeoutError
-			
-		except asyncio.TimeoutError:
-			await ctx.send(":thumbsdown:, Your request timed out")
+		async with ctx.typing:
+			try:
+				for k,v in self.meetup_dict.items():
+					await ctx.author.send(v)
+					msg = await self.bot.wait_for('message', timeout=60.0, check=check)
+					event[k] = msg 
+					if msg.content.lower() in self.cancel_messages: raise asyncio.TimeoutError
+				
+			except asyncio.TimeoutError:
+				await ctx.send(":thumbsdown:, Your request timed out")
 
-		else:
-			if is_url(event['location'].content) is not None:
-				embed = discord.Embed(title=event['title'].content, url=event['location'].content, description=event['when_where'].content, color=0x00baa6)
 			else:
-				embed = discord.Embed(title=event['title'].content, description=event['when_where'].content, color=0x00baa6)
-			
-			embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
-			embed.add_field(name='Type', value=event['type'].content, inline=True)
-			embed.add_field(name='Time', value=event['time'].content, inline=True)
-			embed.add_field(name='Activity', value=event['activity'].content, inline=True)
-			embed.add_field(name='Cost', value=event['cost'].content, inline=True)
-			embed.set_footer(text=event['description'].content)
-			
-			if ctx.message.channel.id == 400567035249033217:
-				self.meetup_mention = '<@&489719429224071168>'
-			elif ctx.message.channel.id == 362691852274630657:
-				self.meetup_mention = '<@&487120797190848534>'
+				if is_url(event['location'].content) is not None:
+					embed = discord.Embed(title=event['title'].content, url=event['location'].content, description=event['when_where'].content, color=0x00baa6)
+				else:
+					embed = discord.Embed(title=event['title'].content, description=event['when_where'].content, color=0x00baa6)
+				
+				embed.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
+				embed.add_field(name='Type', value=event['type'].content, inline=True)
+				embed.add_field(name='Time', value=event['time'].content, inline=True)
+				embed.add_field(name='Activity', value=event['activity'].content, inline=True)
+				embed.add_field(name='Cost', value=event['cost'].content, inline=True)
+				embed.set_footer(text=event['description'].content)
+				
+				if ctx.message.channel.id == 400567035249033217:
+					self.meetup_mention = '<@&489719429224071168>'
+				elif ctx.message.channel.id == 362691852274630657:
+					self.meetup_mention = '<@&487120797190848534>'
 
-			embed_msg = await ctx.send('A new {} has appeared!'.format(self.meetup_mention), embed=embed)
-			await embed_msg.pin()
-			await embed_msg.add_reaction('👍')
-			await embed_msg.add_reaction('👀')
-			await embed_msg.add_reaction('👎')
+				embed_msg = await ctx.send('A new {} has appeared!'.format(self.meetup_mention), embed=embed)
+				await embed_msg.pin()
+				await embed_msg.add_reaction('👍')
+				await embed_msg.add_reaction('👀')
+				await embed_msg.add_reaction('👎')
 
-			self.event_list.append((embed_msg, ctx.author))
+				self.event_list.append((embed_msg, ctx.author))
 
-			await ctx.author.send("Success!")
-			await ctx.send("👍 Meetup successfully created! Add any X emoji to the message to delete the event. Add any check emoji to unpin the event.", delete_after=20.0)
+				await ctx.author.send("Success!")
+				await ctx.send("👍 Meetup successfully created! Add any X emoji to the message to delete the event. Add any check emoji to unpin the event.", delete_after=20.0)
 
-			await ctx.message.delete()
+				await ctx.message.delete()
 
 	@commands.command()
 	@commands.check(check_rx)	
