@@ -3,3 +3,4 @@ tk.py
 .DS_Store
 __pycache__
 cogs/__pycache__
+uw.command
