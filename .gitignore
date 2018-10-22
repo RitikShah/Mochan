@@ -1,2 +1,6 @@
 # ignore token file
 tk.py
+__pycache__
+cogs/__pycache__
+.DS_Store
+uw.command
