@@ -143,4 +143,4 @@ class MeetupCog:
 		await ctx.author.send("You said: " + msg.content)
 
 def setup(bot):
-    bot.add_cog(MeetupCog(bot))
+	bot.add_cog(MeetupCog(bot))
