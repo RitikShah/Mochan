@@ -1,10 +1,13 @@
 import discord
+import logging
 import asyncio
 import re
 from random import randint
 from discord.ext import commands
 
 class MeetupCog:
+	LOGGER = logging.getLogger('MeetupCog')
+
 	meetup_channels = (400567035249033217, 362691852274630657)
 	meetup_mention = '<@&487120797190848534>'
 

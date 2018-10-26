@@ -19,8 +19,8 @@ extensions = ['cogs.meetup', 'cogs.random']
 
 bot = commands.Bot(command_prefix=get_prefix, description='The RX UW Bot.... of Doom V2.0')
 
-logging.basicConfig(level="WARNING")
-setattr(bot, "logger", logging.getLogger("log"))
+logging.basicConfig(level="INFO")
+bot.logger = logging.getLogger(type(bot).__qualname__)
 
 ''' Loads the extensions '''
 if __name__ == '__main__':
