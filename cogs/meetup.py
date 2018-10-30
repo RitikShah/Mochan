@@ -30,7 +30,7 @@ class MeetupCog:
 
 	rx_uw_bot_id = 489158438086115328
 
-	url_pattern = '(https?:\\/\\/(?:www\\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|www\\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|https?:\\/\\/(?:www\\.|(?!www))[a-zA-Z0-9]\\.[^\\s]{2,}|www\\.[a-zA-Z0-9]\\.[^\\s]{2,})'
+	prog = re.compile('(https?:\\/\\/(?:www\\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|www\\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|https?:\\/\\/(?:www\\.|(?!www))[a-zA-Z0-9]\\.[^\\s]{2,}|www\\.[a-zA-Z0-9]\\.[^\\s]{2,})')
 
 	json_file = 'data.json'
 
@@ -72,7 +72,8 @@ class MeetupCog:
 	async def on_message_delete(self, message):
 		if self.data[f'{message.guild.id}'] is not None and message.author.id == self.rx_uw_bot_id:
 			for event in self.data[f'{message.guild.id}']['events']:
-				if event['embed_id'] == message.id: del(event)
+				if event['embed_id'] == message.id:
+					del(event)
 	
 	async def on_ready(self):
 		print(f'Reading {self.json_file}')
@@ -111,8 +112,7 @@ class MeetupCog:
 			return (msg.author == ctx.author) and (msg.guild is None)
 
 		def is_url(url):
-			prog = re.compile(self.url_pattern)
-			return prog.search(url)
+			return self.prog.search(url)
 
 		await ctx.send("You have been dm'd with instructions.", delete_after=15.0)
 		await ctx.author.send("I will ask you a few questions about your meetup. \nSay cancel or stop at any point to cancel.\n\n")
@@ -174,17 +174,26 @@ class MeetupCog:
 	@commands.command()
 	@commands.check(check_meetup_channel)
 	async def list(self, ctx):
+		events = self.data[f'{ctx.guild.id}']['events']
 		s_msg = ''
 		counter = 0
-		for event in self.data[f'{ctx.guild.id}']['events']:
+		for event in events:
 			counter += 1
 			s_msg += self.num_to_emoji[counter] + ' ' + event['title'] + ': ' + event['time'] + '\n'
 
 		msg = await ctx.send(s_msg)
-		for num in len(self.data[f'{ctx.guild.id}']['events']):
+		for num in len(events):
 			await msg.add_reaction(self.num_to_emoji[num])
 
-
+	'''
+	@commands.command()
+	@commands.check(check_meetup_channel)
+	async def delete(self, ctx, id):
+		for num, event in enumerate(self.data[f'']):
+			if num == id:
+				del event
+	'''
+	
 	@commands.command()
 	@commands.check(check_rx)	
 	async def testpin(self, ctx):

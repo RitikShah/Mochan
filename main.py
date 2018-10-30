@@ -10,12 +10,10 @@ import tk
 
 logging.basicConfig(level="INFO")
 
-bot = commands.Bot(command_prefix="~", description="Rx has the best bot let that be heard.")
-setattr(bot, "logger", logging.getLogger("log"))
 
 ''' Returns prefixes for bot '''
 def get_prefix(bot, message):
-	prefixes = ['~']
+	prefixes = ['>']
 
 	# If we are in a guild, we allow for the user to mention us or use any of the prefixes in our list.
 	return commands.when_mentioned_or(*prefixes)(bot, message)
@@ -23,6 +21,7 @@ def get_prefix(bot, message):
 extensions = ['cogs.meetup']
 
 bot = commands.Bot(command_prefix=get_prefix, description='The RX UW Bot.... of Doom V2.0')
+setattr(bot, "logger", logging.getLogger("log"))
 
 ''' Loads the extensions '''
 if __name__ == '__main__':
