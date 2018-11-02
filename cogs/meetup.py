@@ -68,6 +68,7 @@ class MeetupCog:
 	@commands.check(check_meetup_channel)
 	@commands.has_any_role('meetup', 'Mods', 'Admins')
 	async def meetup(self, ctx):
+		self.LOGGER.info('Meetup command ran')
 		event = {}
 
 		def check(msg):
@@ -80,15 +81,16 @@ class MeetupCog:
 		await ctx.send("You have been dm'd with instructions.", delete_after=15.0)
 		await ctx.author.send("I will ask you a few questions about your meetup. \nSay cancel or stop at any point to cancel.\n ")
 
-		async with ctx.typing:
+		async with ctx.typing():
 			try:
 				for k,v in self.meetup_dict.items():
 					await ctx.author.send(v)
 					msg = await self.bot.wait_for('message', timeout=60.0, check=check)
-					event[k] = msg 
+					event[k] = msg
 					if msg.content.lower() in self.cancel_messages: raise asyncio.TimeoutError
 				
 			except asyncio.TimeoutError:
+				self.LOGGER.info('Request timed-out')
 				await ctx.send(":thumbsdown:, Your request timed out")
 
 			else:
@@ -110,6 +112,9 @@ class MeetupCog:
 					self.meetup_mention = '<@&487120797190848534>'
 
 				embed_msg = await ctx.send('A new {} has appeared!'.format(self.meetup_mention), embed=embed)
+
+				self.LOGGER.info('Embed successfully sent')
+
 				await embed_msg.pin()
 				await embed_msg.add_reaction('👍')
 				await embed_msg.add_reaction('👀')
