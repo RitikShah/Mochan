@@ -1,36 +1,41 @@
 import random
+import json
 import re
 
-class Grammar:
-	def __init__(self, raw: str):
-		self.grammar = {}
+def create(filename: str, raw: str):
+	grammar = {}
 
-		spaces = re.compile('\\s+')
-		bars = re.compile('\\|')
+	spaces = re.compile('\\s+')
+	bars = re.compile('\\|')
 
-		# Ensure every line has ':=='
-		for line in [ele.split('::=') for ele in raw.split('\n')]:
-			assert(len(line) == 2)
-			assert(line[0] not in self.grammar)
+	# Ensure every line has ':=='
+	for line in [ele.split('::=') for ele in raw.split('\n')]:
+		assert(len(line) == 2)
+		assert(line[0] not in grammar)
 
-			self.grammar[line[0]] = [spaces.split(ele) for ele in bars.split(line[1].strip())]
+		grammar[line[0]] = [spaces.split(ele) for ele in bars.split(line[1].strip())]
 
-	def generate(self, symbol, times=None):
-		if times is not None:
-			assert(times > 0 and symbol in self.grammar)
-			return [self.generate(symbol) for i in range(times)]
+	return grammar
 
+def generate(sym, grammar):
+	def _gen(symbol):
+		if symbol not in grammar:
+			return symbol
 		else:
-			if symbol not in self.grammar:
-				return symbol
-			else:
-				output = [self.generate(symb) for symb in random.choice(self.grammar[symbol])]
-				return ' '.join(output)
+			output = [_gen(symb) for symb in random.choice(grammar[symbol])]
+			return ' '.join(output)
+
+	return _gen(sym)
 
 # main testing method
 if __name__ == '__main__':
 	stuff = ''
+	filename = input('Filename: ')
+	with open('grammar/' + filename + '.txt', 'r') as file:
+		grammar = create(filename, file.read())
 
-	with open('grammar/' + input('Filename: ') + '.txt', 'r') as file:
-		print(Grammar(file.read()).generate('<s>', int(input('How many times: '))))
+		with open(filename + '.json', 'w') as outfile:
+			json.dump(grammar, outfile)
+
+		print(generate('<s>', grammar))
 	

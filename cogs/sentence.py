@@ -67,6 +67,7 @@ class SentenceCog:
 		except asyncio.TimeoutError:
 			await ctx.send(":thumbsdown:, Your request timed out")
 			
-
+#with open(filename + '.json', 'w') as outfile:
+		#json.dump(grammar, outfile)
 def setup(bot):
 	bot.add_cog(SentenceCog(bot))
