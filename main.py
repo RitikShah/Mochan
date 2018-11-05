@@ -15,7 +15,7 @@ def get_prefix(bot, message):
 	# If we are in a guild, we allow for the user to mention us or use any of the prefixes in our list.
 	return commands.when_mentioned_or(*prefixes)(bot, message)
 
-extensions = ['cogs.meetup', 'cogs.random', 'cogs.sentence']
+extensions = ['cogs.meetup', 'cogs.rando', 'cogs.sentence']
 
 bot = commands.Bot(command_prefix=get_prefix, description='The RX UW Bot.... of Doom V2.0')
 
