@@ -1,6 +1,7 @@
 import discord
 import logging
 import asyncio
+import error
 import re
 from random import randint
 from discord.ext import commands
@@ -87,7 +88,8 @@ class MeetupCog:
 					await ctx.author.send(v)
 					msg = await self.bot.wait_for('message', timeout=60.0, check=check)
 					event[k] = msg
-					if msg.content.lower() in self.cancel_messages: raise asyncio.TimeoutError
+					if msg.content.lower() in self.cancel_messages:
+						raise asyncio.TimeoutError
 				
 			except asyncio.TimeoutError:
 				self.LOGGER.info('Request timed-out')
