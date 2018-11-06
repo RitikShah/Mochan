@@ -4,3 +4,4 @@ tk.py
 __pycache__
 cogs/__pycache__
 uw.command
+cogs/grammar
