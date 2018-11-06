@@ -11,7 +11,7 @@ import tk
 ''' Returns prefixes for bot '''
 def get_prefix(bot, message):
 	if len(sys.argv) > 1:
-		prefixes = [sys.argv[1]]
+		__, *prefixes = sys.argv
 	else:
 		prefixes = ['~']
 

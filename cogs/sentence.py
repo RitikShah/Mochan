@@ -29,7 +29,7 @@ class SentenceCog:
 
 		# Ensure every line has ':=='
 		for line in [ele.split('::=') for ele in raw.split('\n')]:
-			print(line)
+			if line[0] == '': continue
 			assert(len(line) == 2)
 			assert(line[0] not in grammar)
 
@@ -110,9 +110,7 @@ class SentenceCog:
 			cancel(msg)
 
 			with open('cogs/grammar/' + filename + '.json', 'w') as outfile:
-				dum = self.create(msg.content.replace('```', ''))
-				print(dum)
-				json.dump(dum, outfile)
+				json.dump(self.create(msg.content.replace('```', '')), outfile)
 				self.LOGGER.info('Created file: ' + filename + '.json')
 
 			await ctx.author.send("Success!")
