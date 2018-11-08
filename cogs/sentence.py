@@ -13,9 +13,12 @@ class SentenceCog:
 	cancel_messages = ('cancel', 'stop')
 
 	reg_exp = re.compile('(([`"]{3}).*?\\2)')
+
+	rx_uw_bot_id = 489158438086115328
 	
 	def __init__(self, bot):
 		self.bot = bot
+		self.quote_count = 5
 
 	def read_file(self, name):
 		with open(name + '.txt', 'r') as file:
@@ -46,7 +49,15 @@ class SentenceCog:
 				return ' '.join(output)
 
 		return _gen(sym)
+	
+	'''
+	async def on_reaction_add(self, reaction, user):
+		if reaction.message.channel.id == 431666240243630080:
+			if reaction.emoji == ':upvote:365715115728699403':
+				if reaction.count == self.quote_count:
 
+	'''
+	
 	@commands.group(invoke_without_command=True)
 	async def sentence(self, ctx):
 		print('hello world')
@@ -60,7 +71,9 @@ class SentenceCog:
 		with open('cogs/grammar/' + filename + '.json', 'r') as file:
 			grammar = json.load(file)
 
-		await ctx.send(self.generate(symbol, grammar))
+		msg = await ctx.send(self.generate(symbol, grammar))
+		await msg.add_reaction(':upvote:365715115728699403')
+		await msg.add_reaction(':downvote:365720639535054851')
 
 	@sentence.command(name="new")
 	async def sentence_new(self, ctx):
